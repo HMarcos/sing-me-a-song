@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 import app from '../../src/app.js';
 import { prisma } from '../../src/database.js';
 import recommendationFactory from '../factories/recommendationFactory.js';
-import scenarioFactory from '../factories/scnarioFactory.js';
+import scenarioFactory from '../factories/scenarioFactory.js';
 
 beforeEach(async () => {
   await scenarioFactory.deleteAllData();
@@ -116,15 +116,17 @@ describe('Downvote recommendations', () => {
 describe('Get the last 10 recommendations', () => {
   it('Checks if the last 10 registered recommendations are being sent', async () => {
     const recommendations =
-      await scenarioFactory.createScnarioWithManyRecommendations();
+      await scenarioFactory.createScenarioWithManyRecommendations();
     const lastTenRecommendations = recommendations.slice(0, 10);
 
     const response = await agent.get('/recommendations');
     const requestedRecommendations = response.body;
 
+    console.log(lastTenRecommendations);
+
     expect(response.status).toBe(200);
-    expect(response.body).not.toBeNull();
-    expect(response.body).toEqual(lastTenRecommendations);
+    expect(requestedRecommendations).not.toBeNull();
+    expect(requestedRecommendations).toEqual(lastTenRecommendations);
   });
 });
 
@@ -143,6 +145,44 @@ describe('Get a recommendation', () => {
     const response = await agent.get(
       `/recommendations/${faker.random.numeric(3)}`
     );
+    expect(response.status).toBe(404);
+  });
+});
+
+describe('Get a random recommendation', () => {
+  it('Get a random recommendation', async () => {
+    const maxScore = 1000;
+    const recommendations =
+      await scenarioFactory.createScenarioWithManyRecommendations(maxScore);
+
+    const response = await agent.get('/recommendations/random');
+    const randomRecommendation = response.body;
+
+    expect(response.status).toBe(200);
+    expect(response.body).not.toBeNull();
+    expect(recommendations).toEqual(
+      expect.arrayContaining([expect.objectContaining(randomRecommendation)])
+    );
+  });
+
+  it('Get a random recommendation with score less than 10', async () => {
+    const maxScore = 9;
+    const recommendations =
+      await scenarioFactory.createScenarioWithManyRecommendations(maxScore);
+
+    const response = await agent.get('/recommendations/random');
+    const randomRecommendation = response.body;
+
+    expect(response.status).toBe(200);
+    expect(randomRecommendation).not.toBeNull();
+    expect(recommendations).toEqual(
+      expect.arrayContaining([expect.objectContaining(randomRecommendation)])
+    );
+    expect(randomRecommendation.score).toBeLessThan(10);
+  });
+
+  it('Try to get a random music with no song registered', async () => {
+    const response = await agent.get('/recommendations/random');
     expect(response.status).toBe(404);
   });
 });

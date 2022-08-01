@@ -27,11 +27,11 @@ async function createScenarioWithRecommendationScoreOfMinusFive() {
   return recommendation;
 }
 
-async function createScnarioWithManyRecommendations() {
+async function createScenarioWithManyRecommendations(maxScore: number = 1000) {
   const recommendationsData = [];
   for (let i = 0; i < 30; i++) {
     const recommendation =
-      recommendationFactory.createValidRecommendationInfo();
+      recommendationFactory.createValidRecommendationInfoWithScore(maxScore);
     recommendationsData.push(recommendation);
   }
 
@@ -56,7 +56,7 @@ async function deleteAllData() {
 const scenarioFactory = {
   createScenarioWithInitialDefaultRecommendation,
   createScenarioWithRecommendationScoreOfMinusFive,
-  createScnarioWithManyRecommendations,
+  createScenarioWithManyRecommendations,
   deleteAllData,
 };
 

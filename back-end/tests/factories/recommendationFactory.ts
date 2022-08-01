@@ -15,6 +15,16 @@ function createValidRecommendationInfo() {
   return recommendation;
 }
 
+function createValidRecommendationInfoWithScore(maxScore: number = 1000) {
+  const recommendation: CreateRecommendationDataWithScore = {
+    name: faker.music.songName(),
+    youtubeLink: `https://www.youtube.com/watch?v=${faker.random.alphaNumeric()}`,
+    score: faker.datatype.number({ max: maxScore }),
+  };
+
+  return recommendation;
+}
+
 async function createRecommendation(
   recommendation: CreateRecommendationData | CreateRecommendationDataWithScore
 ) {
@@ -26,6 +36,7 @@ async function createRecommendation(
 
 const recommendationFactory = {
   createValidRecommendationInfo,
+  createValidRecommendationInfoWithScore,
   createRecommendation,
 };
 
