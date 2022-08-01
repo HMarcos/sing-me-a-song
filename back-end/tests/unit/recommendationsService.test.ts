@@ -126,7 +126,6 @@ describe('insert recommendation service test suite', () => {
 
   it('Rejects to insert a recommendation', async () => {
     const registeredRecommendation = recommendationFactory.createRecommendationInfo();
-
     jest.spyOn(recommendationRepository, 'findByName').mockResolvedValueOnce(registeredRecommendation);
 
     const newRecommendation = recommendationFactory.createValidRecommendationInfo();
@@ -137,5 +136,81 @@ describe('insert recommendation service test suite', () => {
       message: 'Recommendations names must be unique',
     });
     expect(recommendationRepository.findByName).toHaveBeenCalledWith(newRecommendation.name);
+  });
+});
+
+describe('upvote recommendation service test suite', () => {
+  it('Upvote a recommendation', async () => {
+    const registeredRecommendation = recommendationFactory.createRecommendationInfo();
+    
+    jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(registeredRecommendation);
+    jest.spyOn(recommendationRepository, 'updateScore').mockImplementationOnce((): any => {});
+
+    await recommendationService.upvote(registeredRecommendation.id);
+
+    expect(recommendationRepository.find).toHaveBeenCalledWith(registeredRecommendation.id);
+    expect(recommendationRepository.updateScore).toHaveBeenCalledWith(registeredRecommendation.id, 'increment');
+  });
+
+  it('Rejects to upvote a recommendation', async () => {
+    const registeredRecommendation = recommendationFactory.createRecommendationInfo();
+    jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(undefined);
+
+    const promise = recommendationService.upvote(registeredRecommendation.id);
+
+    await expect(promise).rejects.toEqual({
+      type: 'not_found',
+      message: '',
+    });
+    expect(recommendationRepository.find).toHaveBeenCalledWith(registeredRecommendation.id);
+  });
+});
+
+describe('downvote recommendation service test suite', () => {
+  it('Downvote a recommendation', async () => {
+    const registeredRecommendation = recommendationFactory.createRecommendationInfo(10, 1);
+
+    jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(registeredRecommendation);
+    jest.spyOn(recommendationRepository, 'updateScore').mockImplementationOnce((): any => {
+      const updatedScore = registeredRecommendation.score - 1;
+      const updatedRecommendation = { ...registeredRecommendation, score: updatedScore };
+      return updatedRecommendation;
+    });
+
+    await recommendationService.downvote(registeredRecommendation.id);
+
+    expect(recommendationRepository.find).toHaveBeenCalledWith(registeredRecommendation.id);
+    expect(recommendationRepository.updateScore).toHaveBeenCalledWith(registeredRecommendation.id, 'decrement');
+  });
+
+  it('Downvote and exclude recommendation - Score less than -5', async () => {
+    const registeredRecommendation = recommendationFactory.createRecommendationInfo(-5, -5);
+
+    jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(registeredRecommendation);
+    jest.spyOn(recommendationRepository, 'updateScore').mockImplementationOnce((): any => {
+      const updatedScore = registeredRecommendation.score - 1;
+      const updatedRecommendation = { ...registeredRecommendation, score: updatedScore };
+      return updatedRecommendation;
+    });
+    jest.spyOn(recommendationRepository, 'remove').mockImplementationOnce((): any => {});
+
+    await recommendationService.downvote(registeredRecommendation.id);
+
+    expect(recommendationRepository.find).toHaveBeenCalledWith(registeredRecommendation.id);
+    expect(recommendationRepository.updateScore).toHaveBeenCalledWith(registeredRecommendation.id, 'decrement');
+    expect(recommendationRepository.remove).toHaveBeenCalledWith(registeredRecommendation.id);
+  });
+
+  it('Rejects to upvote a recommendation', async () => {
+    const registeredRecommendation = recommendationFactory.createRecommendationInfo();
+    jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(undefined);
+
+    const promise = recommendationService.downvote(registeredRecommendation.id);
+
+    await expect(promise).rejects.toEqual({
+      type: 'not_found',
+      message: '',
+    });
+    expect(recommendationRepository.find).toHaveBeenCalledWith(registeredRecommendation.id);
   });
 });
