@@ -100,6 +100,19 @@ describe('Get random recommendation test suite', () => {
   });
 });
 
+describe('Get top recommendations test suite', () => {
+  it('should return the top recommendations for user', () => {
+    const recommendation = {
+      name: faker.music.songName(),
+      youtubeLink: 'https://www.youtube.com/watch?v=e6QhH3q-UJE',
+    };
+
+    cy.createRecommendation(recommendation);
+    cy.contains('Top').click();
+    cy.contains(`${recommendation.name}`).should('be.visible');
+  });
+});
+
 afterEach(() => {
   cy.resetRecommendations();
 });
