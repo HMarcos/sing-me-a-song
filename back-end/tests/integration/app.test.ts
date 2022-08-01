@@ -127,3 +127,22 @@ describe('Get the last 10 recommendations', () => {
     expect(response.body).toEqual(lastTenRecommendations);
   });
 });
+
+describe('Get a recommendation', () => {
+  it('Get a valid recommendation', async () => {
+    const recommendation =
+      await scenarioFactory.createScenarioWithInitialDefaultRecommendation();
+    const { id } = recommendation;
+    const response = await agent.get(`/recommendations/${id}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(recommendation);
+  });
+
+  it('Try to get a non-existent recommendation', async () => {
+    const response = await agent.get(
+      `/recommendations/${faker.random.numeric(3)}`
+    );
+    expect(response.status).toBe(404);
+  });
+});
