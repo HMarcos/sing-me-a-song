@@ -7,10 +7,9 @@ jest.mock('../../src/repositories/recommendationRepository');
 
 beforeEach(() => {
   jest.clearAllMocks();
-  //jest.resetAllMocks();
 });
 
-describe('getRandom service test suite', () => {
+describe('getRandom recommendation service test suite', () => {
   it('Return a song with a score greater than 10 - 70% of cases', async () => {
     const recommendations = [
       recommendationFactory.createRecommendationInfo(1000, 10),
@@ -142,7 +141,7 @@ describe('insert recommendation service test suite', () => {
 describe('upvote recommendation service test suite', () => {
   it('Upvote a recommendation', async () => {
     const registeredRecommendation = recommendationFactory.createRecommendationInfo();
-    
+
     jest.spyOn(recommendationRepository, 'find').mockResolvedValueOnce(registeredRecommendation);
     jest.spyOn(recommendationRepository, 'updateScore').mockImplementationOnce((): any => {});
 
@@ -212,5 +211,27 @@ describe('downvote recommendation service test suite', () => {
       message: '',
     });
     expect(recommendationRepository.find).toHaveBeenCalledWith(registeredRecommendation.id);
+  });
+});
+
+describe('get recommendations service test suite', () => {
+  it('Get the latest registered recommendations', async () => {
+    const registeredRecommendation = recommendationFactory.createRecommendationInfo();
+    jest.spyOn(recommendationRepository, 'findAll').mockResolvedValueOnce([registeredRecommendation]);
+    const result = await recommendationService.get();
+
+    expect(recommendationRepository.findAll).toHaveBeenCalledWith();
+    expect(result).toEqual([registeredRecommendation]);
+  });
+});
+
+describe('getTop recommendations service test suite', () => {
+  it('Get the top registered recommendations', async () => {
+    const registeredRecommendation = recommendationFactory.createRecommendationInfo();
+    jest.spyOn(recommendationRepository, 'getAmountByScore').mockResolvedValueOnce([registeredRecommendation]);
+    const result = await recommendationService.getTop(1);
+
+    expect(recommendationRepository.getAmountByScore).toHaveBeenCalledWith(1);
+    expect(result).toEqual([registeredRecommendation]);
   });
 });
