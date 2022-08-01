@@ -27,6 +27,26 @@ async function createScenarioWithRecommendationScoreOfMinusFive() {
   return recommendation;
 }
 
+async function createScnarioWithManyRecommendations() {
+  const recommendationsData = [];
+  for (let i = 0; i < 30; i++) {
+    const recommendation =
+      recommendationFactory.createValidRecommendationInfo();
+    recommendationsData.push(recommendation);
+  }
+
+  await prisma.recommendation.createMany({
+    data: recommendationsData,
+    skipDuplicates: true,
+  });
+
+  const recommendations = await prisma.recommendation.findMany({
+    orderBy: { id: 'desc' },
+  });
+
+  return recommendations;
+}
+
 async function deleteAllData() {
   await prisma.$transaction([
     prisma.$executeRaw`TRUNCATE TABLE recommendations`,
@@ -36,6 +56,7 @@ async function deleteAllData() {
 const scenarioFactory = {
   createScenarioWithInitialDefaultRecommendation,
   createScenarioWithRecommendationScoreOfMinusFive,
+  createScnarioWithManyRecommendations,
   deleteAllData,
 };
 

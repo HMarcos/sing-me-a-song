@@ -112,3 +112,18 @@ describe('Downvote recommendations', () => {
     expect(response.status).toBe(404);
   });
 });
+
+describe('Get the last 10 recommendations', () => {
+  it('Checks if the last 10 registered recommendations are being sent', async () => {
+    const recommendations =
+      await scenarioFactory.createScnarioWithManyRecommendations();
+    const lastTenRecommendations = recommendations.slice(0, 10);
+
+    const response = await agent.get('/recommendations');
+    const requestedRecommendations = response.body;
+
+    expect(response.status).toBe(200);
+    expect(response.body).not.toBeNull();
+    expect(response.body).toEqual(lastTenRecommendations);
+  });
+});
