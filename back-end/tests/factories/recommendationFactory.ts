@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { Recommendation } from '@prisma/client';
 import { prisma } from '../../src/database.js';
 import { CreateRecommendationData } from '../../src/services/recommendationsService.js';
 
@@ -10,6 +11,17 @@ function createValidRecommendationInfo() {
   const recommendation: CreateRecommendationData = {
     name: faker.music.songName(),
     youtubeLink: `https://www.youtube.com/watch?v=${faker.random.alphaNumeric()}`,
+  };
+
+  return recommendation;
+}
+
+function createRecommendationInfo(maxScore = 1000, minScore = -5) {
+  const recommendation: Recommendation = {
+    id: faker.datatype.number({ min: 1, max: 100 }),
+    name: faker.music.songName(),
+    youtubeLink: `https://www.youtube.com/watch?v=${faker.random.alphaNumeric()}`,
+    score: faker.datatype.number({ min: minScore, max: maxScore }),
   };
 
   return recommendation;
@@ -36,6 +48,7 @@ async function createRecommendation(
 
 const recommendationFactory = {
   createValidRecommendationInfo,
+  createRecommendationInfo,
   createValidRecommendationInfoWithScore,
   createRecommendation,
 };
