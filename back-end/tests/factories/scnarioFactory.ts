@@ -1,14 +1,11 @@
-import { prisma } from "../../src/database.js";
-
+import { prisma } from '../../src/database.js';
 
 async function deleteAllData() {
-    await prisma.$transaction([
-        prisma.$executeRaw`TRUNCATE TABLE recommendations`
-    ]);
+  await prisma.$transaction([prisma.$executeRaw`TRUNCATE TABLE recommendations`]);
 }
 
 const scenarioFactory = {
-    deleteAllData,
+  deleteAllData,
 };
 
 export default scenarioFactory;
