@@ -37,9 +37,7 @@ function createValidRecommendationInfoWithScore(maxScore: number = 1000) {
   return recommendation;
 }
 
-async function createRecommendation(
-  recommendation: CreateRecommendationData | CreateRecommendationDataWithScore
-) {
+async function createRecommendation(recommendation: CreateRecommendationData | CreateRecommendationDataWithScore) {
   const createdRecommendation = await prisma.recommendation.create({
     data: recommendation,
   });

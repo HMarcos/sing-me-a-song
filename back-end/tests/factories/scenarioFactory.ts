@@ -1,29 +1,21 @@
 import { prisma } from '../../src/database.js';
-import recommendationFactory, {
-  CreateRecommendationDataWithScore,
-} from './recommendationFactory.js';
+import recommendationFactory, { CreateRecommendationDataWithScore } from './recommendationFactory.js';
 
 async function createScenarioWithInitialDefaultRecommendation() {
-  const recommendationInfo =
-    recommendationFactory.createValidRecommendationInfo();
-  const recommendation = await recommendationFactory.createRecommendation(
-    recommendationInfo
-  );
+  const recommendationInfo = recommendationFactory.createValidRecommendationInfo();
+  const recommendation = await recommendationFactory.createRecommendation(recommendationInfo);
   return recommendation;
 }
 
 async function createScenarioWithRecommendationScoreOfMinusFive() {
-  const recommendationInfo =
-    recommendationFactory.createValidRecommendationInfo();
+  const recommendationInfo = recommendationFactory.createValidRecommendationInfo();
   const recommendationWithMinusFiveScore = {
     name: recommendationInfo.name,
     youtubeLink: recommendationInfo.youtubeLink,
     score: -5,
   } as CreateRecommendationDataWithScore;
 
-  const recommendation = await recommendationFactory.createRecommendation(
-    recommendationWithMinusFiveScore
-  );
+  const recommendation = await recommendationFactory.createRecommendation(recommendationWithMinusFiveScore);
   return recommendation;
 }
 
@@ -34,8 +26,7 @@ async function createScenarioWithManyRecommendations(
 ) {
   const recommendationsData = [];
   for (let i = 0; i < amount; i++) {
-    const recommendation =
-      recommendationFactory.createValidRecommendationInfoWithScore(maxScore);
+    const recommendation = recommendationFactory.createValidRecommendationInfoWithScore(maxScore);
     recommendationsData.push(recommendation);
   }
 
@@ -60,9 +51,7 @@ async function createScenarioWithManyRecommendations(
 }
 
 async function deleteAllData() {
-  await prisma.$transaction([
-    prisma.$executeRaw`TRUNCATE TABLE recommendations`,
-  ]);
+  await prisma.$transaction([prisma.$executeRaw`TRUNCATE TABLE recommendations`]);
 }
 
 const scenarioFactory = {

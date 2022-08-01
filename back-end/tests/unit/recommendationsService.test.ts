@@ -19,9 +19,7 @@ describe('getRandom service test suite', () => {
 
     jest.spyOn(Math, 'random').mockReturnValueOnce(0.5);
     jest.spyOn(Math, 'floor').mockReturnValueOnce(0);
-    jest
-      .spyOn(recommendationRepository, 'findAll')
-      .mockResolvedValueOnce([recommendations[0]]);
+    jest.spyOn(recommendationRepository, 'findAll').mockResolvedValueOnce([recommendations[0]]);
 
     const result = await recommendationService.getRandom();
     expect(recommendationRepository.findAll).toHaveBeenCalledWith({
@@ -42,10 +40,7 @@ describe('getRandom service test suite', () => {
 
     jest.spyOn(Math, 'random').mockReturnValueOnce(0.5);
     jest.spyOn(Math, 'floor').mockReturnValueOnce(0);
-    jest
-      .spyOn(recommendationRepository, 'findAll')
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(recommendations);
+    jest.spyOn(recommendationRepository, 'findAll').mockResolvedValueOnce([]).mockResolvedValueOnce(recommendations);
 
     const result = await recommendationService.getRandom();
     expect(recommendationRepository.findAll).toHaveBeenNthCalledWith(1, {
@@ -65,9 +60,7 @@ describe('getRandom service test suite', () => {
 
     jest.spyOn(Math, 'random').mockReturnValueOnce(0.8);
     jest.spyOn(Math, 'floor').mockReturnValueOnce(0);
-    jest
-      .spyOn(recommendationRepository, 'findAll')
-      .mockResolvedValueOnce([recommendations[1]]);
+    jest.spyOn(recommendationRepository, 'findAll').mockResolvedValueOnce([recommendations[1]]);
 
     const result = await recommendationService.getRandom();
     expect(recommendationRepository.findAll).toHaveBeenCalledWith({
@@ -88,10 +81,7 @@ describe('getRandom service test suite', () => {
 
     jest.spyOn(Math, 'random').mockReturnValueOnce(0.8);
     jest.spyOn(Math, 'floor').mockReturnValueOnce(0);
-    jest
-      .spyOn(recommendationRepository, 'findAll')
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(recommendations);
+    jest.spyOn(recommendationRepository, 'findAll').mockResolvedValueOnce([]).mockResolvedValueOnce(recommendations);
 
     const result = await recommendationService.getRandom();
     expect(recommendationRepository.findAll).toHaveBeenNthCalledWith(1, {
@@ -119,5 +109,33 @@ describe('getRandom service test suite', () => {
       scoreFilter: 'lte',
     });
     expect(recommendationRepository.findAll).toHaveBeenNthCalledWith(2);
+  });
+});
+
+describe('insert recommendation service test suite', () => {
+  it('Insert a valid recommendation', async () => {
+    jest.spyOn(recommendationRepository, 'findByName').mockResolvedValueOnce(undefined);
+    jest.spyOn(recommendationRepository, 'create').mockImplementationOnce((): any => {});
+
+    const recommendation = recommendationFactory.createValidRecommendationInfo();
+    await recommendationService.insert(recommendation);
+
+    expect(recommendationRepository.findByName).toHaveBeenCalledWith(recommendation.name);
+    expect(recommendationRepository.create).toHaveBeenCalledWith(recommendation);
+  });
+
+  it('Rejects to insert a recommendation', async () => {
+    const registeredRecommendation = recommendationFactory.createRecommendationInfo();
+
+    jest.spyOn(recommendationRepository, 'findByName').mockResolvedValueOnce(registeredRecommendation);
+
+    const newRecommendation = recommendationFactory.createValidRecommendationInfo();
+    const promise = recommendationService.insert(newRecommendation);
+
+    await expect(promise).rejects.toEqual({
+      type: 'conflict',
+      message: 'Recommendations names must be unique',
+    });
+    expect(recommendationRepository.findByName).toHaveBeenCalledWith(newRecommendation.name);
   });
 });
