@@ -14,7 +14,8 @@ const agent = supertest(app);
 
 describe('Tests for creating new recommendations.', () => {
   it('Create a valid recommendation', async () => {
-    const recommendation = recommendationFactory.createValidRecommendationInfo();
+    const recommendation =
+      recommendationFactory.createValidRecommendationInfo();
     const response = await agent.post('/recommendations').send(recommendation);
     expect(response.status).toBe(201);
 
@@ -25,10 +26,16 @@ describe('Tests for creating new recommendations.', () => {
   });
 
   it('Try to create a repeat recommendation - Error 409', async () => {
-    const recommendation = recommendationFactory.createValidRecommendationInfo();
-    await recommendationFactory.createRecommendation(recommendation);
+    const recommendation =
+      await scenarioFactory.createScenarioWithInitialDefaultRecommendation();
+    const recommendationRequestData = {
+      name: recommendation.name,
+      youtubeLink: recommendation.youtubeLink,
+    };
 
-    const response = await agent.post('/recommendations').send(recommendation);
+    const response = await agent
+      .post('/recommendations')
+      .send(recommendationRequestData);
     expect(response.status).toBe(409);
   });
 
@@ -38,10 +45,70 @@ describe('Tests for creating new recommendations.', () => {
   });
 
   it('Try to create with invalid youtube link - Error 422', async () => {
-    const recommendation = recommendationFactory.createValidRecommendationInfo();
+    const recommendation =
+      recommendationFactory.createValidRecommendationInfo();
     recommendation.youtubeLink = faker.internet.url();
 
     const response = await agent.post('/recommendations').send(recommendation);
     expect(response.status).toBe(422);
+  });
+});
+
+describe('Upvote recommendations', () => {
+  it('Should increment the recommendation score by 1', async () => {
+    const recommendation =
+      await scenarioFactory.createScenarioWithInitialDefaultRecommendation();
+    const { id } = recommendation;
+    const response = await agent.post(`/recommendations/${id}/upvote`);
+    expect(response.status).toBe(200);
+
+    const updatedRecommendation = await prisma.recommendation.findUnique({
+      where: { id },
+    });
+    expect(updatedRecommendation.score).toBe(recommendation.score + 1);
+    expect(updatedRecommendation.score).toBe(1);
+  });
+
+  it('Try to upvote a non-existent recommendation ', async () => {
+    const response = await agent.post(
+      `/recommendations/${faker.random.numeric(3)}/upvote`
+    );
+    expect(response.status).toBe(404);
+  });
+});
+
+describe('Downvote recommendations', () => {
+  it('Should decrement the recommendation score by 1', async () => {
+    const recommendation =
+      await scenarioFactory.createScenarioWithInitialDefaultRecommendation();
+    const { id } = recommendation;
+    const response = await agent.post(`/recommendations/${id}/downvote`);
+    expect(response.status).toBe(200);
+
+    const updatedRecommendation = await prisma.recommendation.findUnique({
+      where: { id },
+    });
+    expect(updatedRecommendation.score).toBe(recommendation.score - 1);
+    expect(updatedRecommendation.score).toBe(-1);
+  });
+
+  it('Should decrement the recommendation score by 1 and delete the recommendation (score below -5)', async () => {
+    const recommendation =
+      await scenarioFactory.createScenarioWithRecommendationScoreOfMinusFive();
+    const { id } = recommendation;
+    const response = await agent.post(`/recommendations/${id}/downvote`);
+    expect(response.status).toBe(200);
+
+    const updatedRecommendation = await prisma.recommendation.findUnique({
+      where: { id },
+    });
+    expect(updatedRecommendation).toBeNull();
+  });
+
+  it('Try to downvote a non-existent recommendation ', async () => {
+    const response = await agent.post(
+      `/recommendations/${faker.random.numeric(3)}/downvote`
+    );
+    expect(response.status).toBe(404);
   });
 });
