@@ -6,8 +6,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/server.ts",
-    "prisma-test": "dotenv -e .env.test prisma migrate reset --skip-seed",
-    "test": "npm run prisma-test && cross-env NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i"
+    "prisma-test": "dotenv -e .env.test prisma migrate reset --force --skip-seed",
+    "test:integration": "npm run prisma-test && cross-env NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --testPathPattern=tests/integration"
   },
   "keywords": [],
   "author": "",
