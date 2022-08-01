@@ -1,4 +1,5 @@
 import { Recommendation } from '@prisma/client';
+import { removeAllListeners } from 'process';
 import { recommendationRepository } from '../repositories/recommendationRepository.js';
 import { conflictError, notFoundError } from '../utils/errorUtils.js';
 
@@ -76,6 +77,10 @@ function getScoreFilter(random: number) {
   return 'lte';
 }
 
+async function removeAll() {
+  await recommendationRepository.removeAll();
+}
+
 export const recommendationService = {
   insert,
   upvote,
@@ -84,4 +89,5 @@ export const recommendationService = {
   get,
   getById: getByIdOrFail,
   getTop,
+  removeAll,
 };

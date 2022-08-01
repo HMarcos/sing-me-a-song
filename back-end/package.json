@@ -6,10 +6,11 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/server.ts",
+    "dev:test": "dotenv -e .env.test nodemon src/server.ts",
     "prisma-test": "dotenv -e .env.test prisma migrate reset --force --skip-seed",
     "test:integration": "npm run prisma-test && cross-env NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --testPathPattern=tests/integration",
     "test:unit": "dotenv -e .env.test cross-env NODE_OPTIONS=--experimental-vm-modules jest -- -i --coverage --testPathPattern=tests/unit",
-    "test": "dotenv -e .env.test cross-env NODE_OPTIONS=--experimental-vm-modules jest -- -i"
+    "test": "npm run prisma-test && cross-env NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i"
   },
   "keywords": [],
   "author": "",
