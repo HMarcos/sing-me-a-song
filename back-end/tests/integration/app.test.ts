@@ -122,8 +122,6 @@ describe('Get the last 10 recommendations', () => {
     const response = await agent.get('/recommendations');
     const requestedRecommendations = response.body;
 
-    console.log(lastTenRecommendations);
-
     expect(response.status).toBe(200);
     expect(requestedRecommendations).not.toBeNull();
     expect(requestedRecommendations).toEqual(lastTenRecommendations);
@@ -184,5 +182,53 @@ describe('Get a random recommendation', () => {
   it('Try to get a random music with no song registered', async () => {
     const response = await agent.get('/recommendations/random');
     expect(response.status).toBe(404);
+  });
+});
+
+describe('Get the top recommendations', () => {
+  it('Get the top 2 songs with the highest score', async () => {
+    const maxScore = 1000;
+    const amount = 30;
+    const orderBy = 'score';
+
+    const recommendations =
+      await scenarioFactory.createScenarioWithManyRecommendations(
+        maxScore,
+        amount,
+        orderBy
+      );
+
+    const topTwoRecommendations = recommendations.slice(0, 2);
+
+    const response = await agent.get('/recommendations/top/2');
+    const requestedRecommendations = response.body;
+
+    expect(response.status).toBe(200);
+    expect(requestedRecommendations).not.toBeNull();
+    expect(requestedRecommendations).toHaveLength(2);
+    expect(requestedRecommendations).toEqual(topTwoRecommendations);
+  });
+
+  it('Get the top 10 songs with the highest score', async () => {
+    const maxScore = 1000;
+    const amount = 30;
+    const orderBy = 'score';
+
+    const recommendations =
+      await scenarioFactory.createScenarioWithManyRecommendations(
+        maxScore,
+        amount,
+        orderBy
+      );
+
+    const topTenRecommendations = recommendations.slice(0, 10);
+
+    const response = await agent.get('/recommendations/top/10');
+    const requestedRecommendations = response.body;
+
+    expect(response.status).toBe(200);
+    expect(requestedRecommendations).not.toBeNull();
+    expect(requestedRecommendations).toHaveLength(10);
+    expect(requestedRecommendations).toEqual(topTenRecommendations);
   });
 });

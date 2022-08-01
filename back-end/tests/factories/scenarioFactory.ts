@@ -27,9 +27,13 @@ async function createScenarioWithRecommendationScoreOfMinusFive() {
   return recommendation;
 }
 
-async function createScenarioWithManyRecommendations(maxScore: number = 1000) {
+async function createScenarioWithManyRecommendations(
+  maxScore: number = 1000,
+  amount: number = 30,
+  orderBy: 'id' | 'score' = 'id'
+) {
   const recommendationsData = [];
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < amount; i++) {
     const recommendation =
       recommendationFactory.createValidRecommendationInfoWithScore(maxScore);
     recommendationsData.push(recommendation);
@@ -40,9 +44,17 @@ async function createScenarioWithManyRecommendations(maxScore: number = 1000) {
     skipDuplicates: true,
   });
 
-  const recommendations = await prisma.recommendation.findMany({
-    orderBy: { id: 'desc' },
-  });
+  let recommendations = [];
+
+  if (orderBy === 'id') {
+    recommendations = await prisma.recommendation.findMany({
+      orderBy: { id: 'desc' },
+    });
+  } else {
+    recommendations = await prisma.recommendation.findMany({
+      orderBy: { score: 'desc' },
+    });
+  }
 
   return recommendations;
 }
