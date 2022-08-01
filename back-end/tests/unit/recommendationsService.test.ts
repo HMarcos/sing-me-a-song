@@ -235,3 +235,11 @@ describe('getTop recommendations service test suite', () => {
     expect(result).toEqual([registeredRecommendation]);
   });
 });
+
+describe('removeAll recommendations service test suite', () => {
+  it('remove all recommendations', async () => {
+    jest.spyOn(recommendationRepository, 'removeAll').mockImplementationOnce((): any => {});
+    await recommendationService.removeAll();
+    expect(recommendationRepository.removeAll).toHaveBeenCalledWith();
+  });
+});

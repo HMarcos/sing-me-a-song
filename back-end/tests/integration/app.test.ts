@@ -200,3 +200,7 @@ describe('Get the top recommendations', () => {
     expect(requestedRecommendations).toEqual(topTenRecommendations);
   });
 });
+
+afterAll(async () => {
+  await prisma.$disconnect();
+});
